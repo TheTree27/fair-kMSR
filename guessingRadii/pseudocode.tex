@@ -66,8 +66,28 @@ Heinrich-Heine-Universität Düsseldorf \hfill \\[2em]
 \begin{document}
 \printheader	
 \section*{Guessing Radii from a given k-center solution}
+
 \begin{algorithm}
 	\caption{Very Broad Strokes}\label{euclid}
+	\textbf{Input:} $k$-center solution $F_0$, largest Radius of k-center solution $r_1^*$, approximation factor $\beta$, $k$, $\epsilon$
+	\\
+	\textbf{Output:} set $R$ of $O(log^k_{1+epsilon}(k/\epsilon))$ radius profiles
+	\begin{algorithmic}[1]
+		\State //$\tilde{r}_1=$ as the optimal largest radius is within one interval of:
+		\State $lowerBound=(1+\epsilon)^{j-1}*r_1^*/\beta$
+		\State $upperBound=F_0k$
+		\State step through interval with step size $(1+\epsilon)^{j-1}\frac{F_0}{\beta}\ | \ 1 \leq j < k$
+		\ForAll{steps in this interval}
+			\State use that step as upper bound and $\frac{\epsilon}{k} * r_n$ as lower bound
+			\State find the rest of the intervals as before
+		\EndFor
+		\State repeat for all subintervals again until a depth of k is reached
+	\end{algorithmic}
+\end{algorithm}
+
+
+\begin{algorithm}
+	\caption{Medium Granularity}\label{euclid}
 	\textbf{Input:} $k$-center solution $F_0$, largest Radius of k-center solution $r_1^*$, approximation factor $\beta$, $k$, $\epsilon$
 	\\
 	\textbf{Output:} set $R$ of $O(log^k_{1+epsilon}(k/\epsilon))$ radius profiles
@@ -88,8 +108,48 @@ Heinrich-Heine-Universität Düsseldorf \hfill \\[2em]
 			\State use $r_n$ as upper bound and $\frac{\epsilon}{k} * r_n$ as lower bound
 			\State find the rest of the intervals as in line 6-8 and append to $R_{1n}$
 		\EndFor
-		\State repeat for each new radius to calculate profiles $R_{11}...R_{nml...}$, until a depth of $k$ is reached
+		\State repeat for each new radius to calculate profiles $R_{11}...R_{nml...}$ and increment $j$ until a depth of $k$ is reached
 		
+	\end{algorithmic}
+\end{algorithm}
+
+\begin{algorithm}
+	\caption{Exact Algorithm}\label{euclid}
+	\textbf{Input:} $k$-center solution $F_0$, largest Radius of k-center solution $r_1^*$, approximation factor $\beta$, $k$, $\epsilon$
+	\\
+	\textbf{Output:} set $R$ of $O(log^k_{1+epsilon}(k/\epsilon))$ radius profiles
+	\begin{algorithmic}[1]
+		\State $R=\emptyset$
+		\State //$\tilde{r}_1=$ as the optimal largest radius is within one interval of:
+		\State $R_1=\emptyset$
+		\State $lowerBound=(1+\epsilon)^{j-1}*r_1^*/\beta$
+		\State append $lowerBound$ to $R_1$
+		\State $j=1$
+		\While{$j < \log_{1+\epsilon}(\beta k)$ and last element of $R_1 < F_0k$}
+			\State append $(1+\epsilon)^{j-1}\frac{F_0}{\beta}$ to $R_1$
+			\State j++
+		\EndWhile
+		\State append $F_0k$ to $R_1$
+		\State // $R_1$ now contains all guesses for the largest radius
+		\State $T=$ empty tree with root node
+		\ForAll{$r$ in $R_1$}
+			\State add $r$ as child to root
+		\EndFor
+		\While{tree depth $\leq k$}
+			\State dfs traversal
+			\If{node does not have children \textbf{and} node depth $<k$} 
+				\State add $\frac{\epsilon}{k} * r$ as child with $r$ as value of the node
+				\State $j=$node depth
+				\While{$j < \log_{1+\epsilon}(\beta k)$ and last added child $<r$}
+					\State add $(1+\epsilon)^{j-1}\frac{r}{\beta}$ as child
+					\State j++
+				\EndWhile
+			\Else
+				\State continue
+			\EndIf
+		\EndWhile
+		\State $R=$ list of dfs searches, with each leaf node reached as entry
+		\State return $R$
 	\end{algorithmic}
 \end{algorithm}
 
