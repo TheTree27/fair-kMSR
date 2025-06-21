@@ -1,3 +1,15 @@
-# fair-kMSR
-Implementation of FPT approximations for fair k-min-sum-radii as described in https://arxiv.org/abs/2410.00598 .
-Intended to help myself understand the algorithm.
+# Fair k-min-sum-radii
+---------------------------
+This repository contains two jupyter notebooks implementing an FPT approximation of the fair k-min-sum-radii problem. It is based on a paper by Lena Carta, Lukas Drexler, Annika Hennes, Clemens Rösner and Melanie Schmidt that can be found under https://arxiv.org/abs/2410.00598 . \
+The implementation is mostly intended to help myself understand the algorithm, while explicitly formulating the contents of appendix A in a more concrete fashion, as well as looking at the results of the algorithm in practice.
+
+---------------------------
+### The f-kmsr problem
+Clustering problems usually follow the same principles. Given _n_ points in _d_-dimensional space, find _k_, points called centers, according to a given objective. Most notable within this group of problems is the distinction between _k_-means and _k_-center problems. _K_-means allows for any point in space to be chosen, while _k_-center demands that the set of centers _C_ be contained within the set of given points _P_ ($C\subseteq P$).\
+Given _k_ centers, one can assign all other points to their nearest centers using a distance metric, resulting in a clustering. Assuming each point has an additional attribute (e.g. a color), a clustering is called _fair_, if all resulting clusters share the same proportions of attributes/colors. For example, if your data set contains equal numbers of red and blue points, each cluster also has to achieve this 1:1 ratio. In most cases, this means that one can not simply assign each point to it's nearest cluster. Instead, it is necessary to derive a way to guarantee fair clustering, without having to try every single possible assignment.
+In addition, k-min-sum-radii is not just concerned with the radius/size of the largest cluster (the radius being the largest distance from the center to any point in the cluster), but the sum of all cluster radii.
+The paper this repository is based on explains and proofs an approach, whose result is at most $6- \frac{3}{k}+\epsilon$ times as large as the optimal solution. In fact for the special case of 1:1 fairness, the paper suggests slight changes that result in a $3+\epsilon$ approximation.
+
+### The algorithm
+The algortihm is partially and fully implemented in the included notebooks. ufkmsr.ipynb is the unfair version, that skips algorithm 3 of the paper and uses Gonzalez' algorithm as a basis for choosing centers. This process is way overbuilt for the actual usecase of normal k-msr, which can be pretty efficiently solved by simply running Gonzalez a few times and choosing the best result, as well as with a heuristic approach such as in https://github.com/algo-hhu/k-min-sum-radii by Niklas Lenßen, but it is a simpler version to understand more difficult and foundational parts of the approximation and still produces a somewhat respectable (but practically not that useful) $3+\epsilon$ approximation. \
+fkmsr.ipynb icludes the full algorithm, but necessitates a proprietary library by Anna Arutyunova and Daniel Schmidt of Heinrich-Heine-Universität Düsseldorf, since a fair k-center solution is necessary as the basis of the algorithm. As such, it is probably mostly useful for looking at and less so for actually running yourself. Still, if you substitute the k-center solution from the unfair version, you can atleast try it yourself even though the result will not be technically guaranteed to be correct.
